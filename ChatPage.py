@@ -20,6 +20,7 @@ def display_game_answer():
     if hasattr(st.session_state, 'game') and hasattr(st.session_state.game, 'answer'):
         st.markdown(f"**Current Answer:** {st.session_state.game.get_current_answer()}")
         st.markdown(f"**Current selected model:** {st.session_state.game.caller.model_type}")
+        st.markdown(f"**Current selected game:** {st.session_state.selected_game_type.value}")
         
 def add_to_dialogue(role, prompt):
     with st.chat_message(role):

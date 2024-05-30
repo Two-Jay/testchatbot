@@ -4,7 +4,6 @@ from anthropic import Anthropic
 import random
 import re
 
-
 class Dialogue:
     def __init__(self, limit_turns : int = None):
         self.messages = []
@@ -99,8 +98,10 @@ class GeussingGame_field:
     def pre_process(self, prompt: str, is_going: bool):
         if is_going == False:
             return (prompt, is_going)
-        if prompt:
-            return (prompt, is_going)
+        if self.isEnded == True:
+            return ("The game is ended. Please, click the 'refresh' button on the left side.", False)
+        if self.dialouge_history.size() >= 41:
+            return ("You missed the game. Please, try again. click the 'refresh' button on the left side.", False)
         else:
             return (prompt, is_going)
 
@@ -135,14 +136,13 @@ class Heejin_GeussingGame_field(GeussingGame_field):
     def generate_20_hints(self):
         import json
         system_prompt = load_file("resource/heejin_hints.md")
-        hints = {}
-        while True:
-            try:
-                system_prompt = system_prompt.replace("{content}", self.answer)
-                hints = json.loads(self.caller.inference(self.hyperparameters, self.dialouge_history, system_prompt))
-                return hints["hints"]
-            except Exception as e:
-                pass
+        system_prompt = system_prompt.replace("{content}", self.answer)
+        generated = self.caller.chat.completions.create(
+            model=self.caller.model_type,
+            messages=[{"role": "system", "content": system_prompt}]
+        )
+        hints = json.loads(generated)
+        return hints["hints"]
     
     def talk(self, prompt: str = None):
         if check_is_answer_in_prompt(prompt, self.answer) == True:
@@ -150,12 +150,12 @@ class Heejin_GeussingGame_field(GeussingGame_field):
             correct_message = f"Yes! You are correct. the answer is {self.answer}"
             self.dialouge_history.add_message("user", prompt)
             self.dialouge_history.add_message("assistant", correct_message)
-            return prompt
+            return (prompt, False)
         else:
             self.dialouge_history.add_message("user", prompt)
             response = f"No. that's not correct. Hint: {random.choice(self.hints)}"
             self.dialouge_history.add_message("assistant", response)
-            return response
+            return response 
 
 def load_file(file_path: str):
     with open(file_path, "r", encoding="utf-8") as file:

@@ -28,13 +28,6 @@ def create_guessinggame_agent(
                 hyperparameters=hyperparameters,
                 dialouge_history=dialouge_history
             )
-        case GameType.JEONGJUN:
-            return GeussingGame_field(
-                caller=create_caller(model_type),
-                limit_turn=limit_turn,
-                hyperparameters=hyperparameters,
-                dialouge_history=dialouge_history
-            )
         case _:
             raise ValueError("Invalid model type")
     
